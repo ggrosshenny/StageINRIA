@@ -1,9 +1,0 @@
-
---- NEW SESSION: 27/06/2017 11:43:03 ---
-/poutre/mObject1.showIndices = 1
-
---- NEW SESSION: 27/06/2017 13:37:05 ---
-/poutre/FixedROI.computeTriangles = 0
-/poutre/FixedROI.computeEdges = 0
-/poutre/FixedROI.box = 2 9.5 -0.5 8 10.5 0.5
-/poutre/FixedROI.computeTetrahedra = 1
