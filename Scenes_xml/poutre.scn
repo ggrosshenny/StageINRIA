@@ -1,0 +1,39 @@
+<?xml version="1.0"?>
+<!-- parent node -->
+<Node name="root" gravity="0 0 0" dt="0.01">
+  <CollisionPipeline depth="6" verbose="0" draw="0" />
+  <BruteForceDetection name="N2" />
+  <NewProximityIntersection name="Proximity" alarmDistance="0.3" contactDistance="0.2" />
+  <CollisionResponse name="Response" response="default" />
+  <CollisionGroup name="Group" />
+
+  <!-- "poutre" node -->
+  <Node name="poutre">
+    <!-- solver -->
+    <EulerImplicit name="cg_odesolver" printLog="false" />
+    <CGLinearSolver iterations="25" name="linear solver" tolerance="1.0e-9" threshold="1.0e-9" />
+    <!-- mesh loader with physical properties -->
+    <MeshVTKLoader name="loader" filename="mesh/poutre2.vtk" />
+    <Mesh src="@loader" />
+    <MechanicalObject name="mecaObj" src="@loader" dx="2.5" />
+    <!-- Physic manager -->
+    <TetrahedronFEMForceField name="FEM" youngModulus="100" poissonRatio="0.2" computeGlobalMatrix="false" drawAsEdges="true" drawHeterogeneousTetra="true" />
+    <!-- Topology for BoxROI -->
+    <TetrahedronSetTopologyContainer src="@loader" name="Container" />
+    <TetrahedronSetTopologyModifier name="Modifier" />
+    <TetrahedronSetTopologyAlgorithms template="Vec3d" name="TopoAlgo" />
+    <TetrahedronSetGeometryAlgorithms template="Vec3d" name="GeomAlgo" />
+    <DiagonalMass template="Vec3d" name="default5" massDensity="0.15" />
+    <!-- BoxROI for fixed constraint (on the left)-->
+    <BoxROI template="Vec3d" box="2.495 -0.005 -0.005 2.535 0.065 0.0205" drawBoxes="1" position="@mecaObj.rest_position" name="FixedROI" computeTriangles="0" computeTetrahedra="0" computeEdges="0" tetrahedra="@Container.tetrahedra" />
+    <FixedConstraint template="Vec3d" name="default6" indices="@FixedROI.indices" />
+    <!-- BoxROI for constant constraint (on the right) -->
+    <BoxROI template="Vec3d" box="2.495 -0.005 0.18 2.535 0.065 0.205" drawBoxes="1" position="@mecaObj.rest_position" name="constForceFieldROI" computeTriangles="0" computeTetrahedra="0" computeEdges="0" tetrahedra="@Container.tetrahedra" />
+    <ConstantForceField points="constForceFieldROI.indices" force="0.1 0 0" arrowSizeCoef=".1"/>
+    <!-- Visual manager -->
+    <Node name="Visu">
+      <OglModel name="poutreVisual" fileMesh="mesh/poutre_surface.obj" color="red" dx="2.5" />
+      <BarycentricMapping input="@.." output="@poutreVisual" />
+    </Node>
+  </Node>
+</Node>
