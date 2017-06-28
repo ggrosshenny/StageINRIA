@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<Node 	name="Root" gravity="0 0 0" time="0" animate="0"   >
+    <RequiredPlugin name="SofaPython" pluginName="SofaPython" />
+	<VisualStyle displayFlags=" showBehaviorModels showForceFields" />
+  <Node name="Script_to_test_node">
+    <PythonScriptController name="ScriptToTest" filename="test.py" classname="test"/>
+  </Node>
+	<Node name="Execution_timer_script_node">
+		<PythonScriptController name="ExecutionTimerScript" filename="sceneExecutionTimer.py" classname="SceneExecutionTimer"/>
+	</Node>
+
+</Node>
