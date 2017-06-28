@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<Node name="SceneManager" dt="0.02">
+  <VisualStyle displayFlags="showBehaviorModels showForceFields showVisual" />
+  <CollisionPipeline verbose="0" />
+  <BruteForceDetection name="N2" />
+  <CollisionResponse response="default" />
+  <DiscreteIntersection/>
+
+  <Node name="poutreRegGrid">
+    <!-- solver -->
+    <EulerImplicit name="cg_odesolver" printLog="false" />
+    <CGLinearSolver iterations="25" name="linear solver" tolerance="1.0e-9" threshold="1.0e-9" />
+    <!-- Needed mechanical object and mass -->
+    <MechanicalObject name="mecaObj"/>
+    <UniformMass totalmass="50.0" />
+    <!-- Regular grid creation -->
+    <RegularGrid name="regGrid" nx="3" ny="5" nz="10" xmin="2.495" xmax="2.535" ymin="-0.005" ymax="0.065" zmin="-0.005" zmax="0.205" />
+    <RegularGridSpringForceField name="Springs" stiffness="400" damping="4" />
+    <!-- Box for fixed constraint (on the left)-->
+    <BoxConstraint name="fixedConstrBox" box="2.495 -0.005 -0.005 2.535 0.065 0.0205" />
+    <!-- BoxROI for constant constraint (on the right) -->
+    <BoxROI template="Vec3d" name="box_roi2" box="2.490 -0.01 0.175 2.540 0.07 0.21"/>
+    <ConstantForceField points="@box_roi2.indices" force="10 0 0" arrowSizeCoef=".00005"/>
+    <!-- Visual manager -->
+    <Node name="Visu">
+      <OglModel name="poutreVisual" fileMesh="mesh/poutre_surface.obj" color="red" dx="2.5" />
+      <BarycentricMapping input="@.." output="@poutreVisual" />
+    </Node>
+  </Node>
+</Node>
