@@ -1,4 +1,4 @@
-# This script is a transcription in .py of the poutre.scn file
+# This script is a transcription in .py of the poutre.scn file with TetrahedralCorotationalFEMForceField
 
 import Sofa
 
@@ -27,7 +27,7 @@ class test(Sofa.PythonScriptController):
         poutreNode.createObject('Mesh', src='@loader')
         poutreNode.createObject('MechanicalObject', name='mecaObj', src='@loader', dx='2.5')
         # Physic manager
-        poutreNode.createObject('TetrahedronFEMForceField', name='FEM', youngModulus='1000', poissonRatio='0.2', computeGlobalMatrix='false', drawAsEdges='true', drawHeterogeneousTetra='true')
+        poutreNode.createObject('TetrahedralCorotationalFEMForceField', name='CFEM', youngModulus='1000', poissonRatio='0.2', drawAsEdges='true', drawHeterogeneousTetra='true')
         # Set a topology for boxROI
         poutreNode.createObject('TetrahedronSetTopologyContainer', src='@loader', name='Container')
         poutreNode.createObject('TetrahedronSetTopologyModifier', name='Modifier')
@@ -50,7 +50,7 @@ class test(Sofa.PythonScriptController):
 
     def bwdInitGraph(self, node):
         # Send a message to tester script
-        data = ['test.py', 'test']
+        data = ['tetraCorrotationalFEMForceField_SOFA.py', 'test']
         self.rootNode.sendScriptEvent('start', data)
 
         return 0
