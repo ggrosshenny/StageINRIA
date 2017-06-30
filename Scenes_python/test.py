@@ -6,10 +6,10 @@ class test(Sofa.PythonScriptController):
 
 
     #############################################################
-    # Method : onLoaded                                         #
-    # Desc : Called once the script is loaded. Build the scene  #
-    #        composed of a 'poutre' with two BoxRoi : one with  #
-    #        'FixedConstraint' and the other with               #
+    # Method : createGraph                                      #
+    # Desc : Called once the script graph is created. Build the #
+    #        scene composed of a 'poutre' with two BoxRoi : one #
+    #        with 'FixedConstraint' and the other with          #
     #        'ConstantForceField'                               #
     # Param : self - the object itself                          #
     # Param : node - the parent node                            #
