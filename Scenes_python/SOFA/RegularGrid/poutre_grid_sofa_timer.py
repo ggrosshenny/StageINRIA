@@ -3,7 +3,7 @@ import Sofa
 def createScene(node):
     # Creation of advanced timer
 
-    
+
 
     # Creation of stuff needed for collision management
     node.createObject('CollisionPipeline', depth='6', verbose='0', draw='0')
@@ -38,5 +38,5 @@ def createScene(node):
 
     # Visual node
     VisualNode = poutreRegGridNode.createChild('Visu')
-    VisualNode.createObject('OglModel', name='poutreRegGridVisual', fileMesh='mesh/poutre_surface.obj', color='red', dx='2.5')
+    VisualNode.createObject('OglModel', name='poutreRegGridVisual', fileMesh='../../mesh/poutre_surface.obj', color='red', dx='2.5')
     VisualNode.createObject('BarycentricMapping', input='@..', output='@poutreRegGridVisual')
