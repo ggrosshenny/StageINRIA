@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<Node 	name="Root" gravity="0 0 0" >
+  <RequiredPlugin name="SofaPython" pluginName="SofaPython" />
+	<VisualStyle displayFlags=" showBehaviorModels showForceFields" />
+  <Node name="SceneManager_node">
+    <PythonScriptController name="SceneManagerScript" filename="SceneManager.py" classname="SceneManager"/>
+  </Node>
+  <Node name="Script_to_test_node">
+    <PythonScriptController name="ScriptToTest" filename="../SOFA/RegularGrid/poutre_grid_sofa.py" classname="poutreGridSofa"/>
+  </Node>
+
+</Node>

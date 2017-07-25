@@ -76,7 +76,7 @@ class poutreGridSofa(Sofa.PythonScriptController):
         # timer
         Sofa.timerSetInterval("Animate", 2) # Set the number of steps neded to compute the timer
         Sofa.timerSetEnabled("Animate", 1)
-        print Sofa.timerIsEnabled("Animate")
+
 
     def bwdInitGraph(self, node):
         # Send a message to tester script
@@ -86,23 +86,26 @@ class poutreGridSofa(Sofa.PythonScriptController):
 
 
     def animate(self, iterations):
-        # i = 0
-        # while i < iterations:
-        #     self.rootNode.simulationStep(0.1)
-        #     #print "Iteration numero " + str(i)
-        #     #os.write(backup, b'\n\n')
-        #     i = i+1
-        # IO file
         #setup the environment
         #Animation loop
-        i = 0
-        while i < iterations:
-            Sofa.timerBegin("Animate")
-            self.rootNode.simulationStep(0.1)
-            print Sofa.timerGetTimeAnalysis("Animate", self.rootNode)
-            i = i+1
-        data = [' ']
-        self.rootNode.sendScriptEvent('end', data)
+        with open("poutre_grid_sofa_timerLog.log", "w+") as outputFile :
+            outputFile.write("{")
+            i = 0
+            while i < iterations:
+                Sofa.timerBegin("Animate")
+                self.rootNode.simulationStep(0.1)
+                result = Sofa.timerGetTimeAnalysis("Animate", self.rootNode)
+                if result != None :
+                    outputFile.write(result + ",")
+                    oldResult = result
+                i = i+1
+            print "valeur de oldResult : " + oldResult[-1:]
+            last_pose = outputFile.tell()
+            outputFile.seek(last_pose - 1)
+            outputFile.write("\n}")
+            outputFile.close()
+            data = [' ']
+            self.rootNode.sendScriptEvent('end', data)
         return 0
 
     def onScriptEvent(self, senderNode, eventName, data):
