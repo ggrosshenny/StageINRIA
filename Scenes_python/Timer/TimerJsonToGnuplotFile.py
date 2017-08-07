@@ -3,6 +3,37 @@ import json
 
 class TimerJsonToGnuplotFile() :
 
+    def __init__(self):
+        lol = 0
+
+
+    ###
+     # Method : findKey
+     # Brief : find the given key from a given json data
+     # Param : jsonData, json - data extracted from the json file
+     # Param : key, the key to find
+     ###
+    def findKey(self, jsonData, key) :
+        currentlevelKeysValue = []
+
+        for k, v in jsonData.items() :
+            # Keep the keys for deep travel
+            if k != key and k != "Values" :
+                print "voici la cle : " + str(k) + "\n"
+                currentlevelKeysValue.append(v)
+            # If the key was found
+            elif k != "Values" :
+                print "voici la cle : " + str(k) + "\n"
+                return v
+
+        # If the key was not found and there is
+        if len(currentlevelKeysValue) != 0 :
+            for e in currentlevelKeysValue :
+                return self.findKey(e, key)
+
+        # The key doesn't exist in the json
+        return None
+
 
     ###
      # Method : parseJsonComponantsId
@@ -13,21 +44,18 @@ class TimerJsonToGnuplotFile() :
      # Param : timerInterval, int - interval of the AdvancedTimer
      # Param : componantID, string - id of the component to seek in the json file
      ###
-    def parseJsonComponantsId(jsonData, outPutFile, stepsnumber, timerInterval, componantID) :
-        # Write the block name
-        blockName = '\"' + componantID + '\"\n'
-        outPutFile.write(blockName)
+    def parseJsonComponantsId(self, jsonData, outPutFile, firstStep, stepsnumber, timerInterval, componantID) :
+        parsedInformations = []
 
-        # Write block data in the given output file
-        i = 0
-        while(i <= stepsnumber)
-        {
-            data = i + " " + jsonData[i][componantID]["Percent"] + "\n"
-            outPutFile.werite(data)
-            i += timerInterval
-        }
+        # First iteration is used to create the list that will handle informations
+        # The list is defiend as following :
+        #   step | componantID | subComponant | subComponant2 | ...
+        # 0  ""  |  "CompName" | "subCompName"| "subCompName" | ...
+        # 1  1   |    0.285    |      0.185   |      0.1      | ...
+        #                        ...
 
-        outPutFile.write("\n\n") # End of block
+        print "\nthe key value : " + json.dumps(self.findKey(jsonData[str(firstStep)], componantID), indent=4) + "\n"
+
         return 0
 
 
@@ -39,13 +67,15 @@ class TimerJsonToGnuplotFile() :
      # Param : timerInterval, int - interval of the AdvancedTimer
      # Param : *componantsID, list of strings - ids of components to seek in the file
      ###
-    def parseJsonFile(self, jsonFileName, stepsnumber, timerInterval, *componantsID):
-        with open(jsonFileName, "r"), open((jsonFileName + "_gnuplot.plot"), "w+") as jsonFile, gnuplotFile:
-            jsonData = json.load(jsonFile)
+    def parseJsonFile(self, jsonFileName, firstStep, stepsnumber, timerInterval, *componantsID):
+        with open(jsonFileName, "r")  as jsonFile :
+            with open(("../TimerLogs/" + jsonFileName + "_gnuplot.plot"), "w+") as gnuplotFile:
+                jsonData = json.load(jsonFile)
 
-            for componantID in componantsID :
-                parseJsonComponantsId(jsonData, outPutFile, stepsnumber, timerInterval, componantID)
-            
+                for componantID in componantsID :
+                    self.parseJsonComponantsId(jsonData, gnuplotFile, firstStep, stepsnumber, timerInterval, componantID)
+
+                gnuplotFile.close()
             jsonFile.close()
-            gnuplotFile.close()
+
         return 0

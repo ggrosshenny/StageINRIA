@@ -6,7 +6,7 @@
     <PythonScriptController name="ExecutionTimerScript" filename="sceneExecutionTimer.py" classname="SceneExecutionTimer"/>
   </Node>
   <Node name="Script_to_test_node">
-    <PythonScriptController name="ScriptToTest" filename="CMTetrahedralCorotationalFEMForceField.py" classname="test"/>
+    <PythonScriptController name="ScriptToTest" filename="test.py" classname="test"/>
   </Node>
 
 </Node>
