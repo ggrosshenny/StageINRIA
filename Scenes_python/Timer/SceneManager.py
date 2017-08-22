@@ -7,13 +7,13 @@ class SceneManager(Sofa.PythonScriptController):
         rootNode = senderNode.getRoot()
         if eventName=="start":
             # call the script to test
-            iterations = 100
+            iterations = 1000
             sentData = [iterations]
             rootNode.sendScriptEvent(str(data[1]), sentData)
 
         if eventName=='end':
             print "end of the test"
             test = TimerLJSONPlot.TimerLJSONPlot()
-            test.parseJsonFile("poutre_grid_sofa_timerLog.log", 0, "Mechanical")
+            test.parseJsonFile("poutre_grid_CGOGN_timerLog.log", 0, "Mechanical")
 
         return 0

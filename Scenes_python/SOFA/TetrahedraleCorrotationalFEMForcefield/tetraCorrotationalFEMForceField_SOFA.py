@@ -19,7 +19,7 @@ def createScene(node):
     node.createObject('EulerImplicit', name='cg_solver', printLog='false')
     node.createObject('CGLinearSolver', iterations='25', name='linearSolver', tolerance='1.0e-9', threshold='1.0e-9')
     # Mesh loader with physical properties
-    node.createObject('MeshVTKLoader', name='loader', filename='mesh/poutre2.vtk')
+    node.createObject('MeshVTKLoader', name='loader', filename='../mesh/poutre2.vtk')
     node.createObject('Mesh', src='@loader')
     node.createObject('MechanicalObject', name='mecaObj', src='@loader', dx='2.5')
     # Physic manager
@@ -39,7 +39,7 @@ def createScene(node):
 
     # Visual node
     VisualNode = node.createChild('Visu')
-    VisualNode.createObject('OglModel', name='poutreVisual', fileMesh='mesh/poutre_surface.obj', color='red', dx='2.5')
+    VisualNode.createObject('OglModel', name='poutreVisual', fileMesh='../../mesh/poutre_surface.obj', color='red', dx='2.5')
     VisualNode.createObject('BarycentricMapping', input='@..', output='@poutreVisual')
 
     return 0

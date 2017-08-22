@@ -1,38 +1,89 @@
 import Sofa
+import os
+import sys
+from contextlib import contextmanager
 
-def createScene(node):
-    # Creation of stuff needed for collision management
-    node.createObject('CollisionPipeline', depth='6', verbose='0', draw='0')
-    node.createObject('BruteForceDetection')
-    node.createObject('CollisionResponse', response='default')
-    node.createObject('DiscreteIntersection')
-    node.createObject('VisualStyle', displayFlags="showBehaviorModels showForceFields showVisual" )
 
-    # Creation of the 'poutreRegGrid' node
-    poutreRegGridNode = node.createChild('poutreRegGrid')
-    # Add solver
-    poutreRegGridNode.createObject('EulerImplicit', name='cg_solver', printLog='false')
-    poutreRegGridNode.createObject('CGLinearSolver', iterations='25', name='linearSolver', tolerance='1.0e-9', threshold='1.0e-9')
-    # Creation of the regular grid
-    poutreRegGridNode.createObject('MechanicalObject', name='mecaObj')
-    poutreRegGridNode.createObject('RegularGrid', name='regGrid', nx='3', ny='5', nz='10', min='1.995 -0.005 -0.005', max='2.035 0.065 0.205')
-    # Physic manager
-    poutreRegGridNode.createObject('HexahedronFEMForceField', name='HFEM', youngModulus='1000', poissonRatio='0.2')
+class poutreGridCGOGN(Sofa.PythonScriptController) :
 
-    # Set a topology for boxROI
-    poutreRegGridNode.createObject('VolumeTopologyContainer', src='@regGrid', name='Container')
-    poutreRegGridNode.createObject('HexahedronSetTopologyModifier', name='Modifier')
-    poutreRegGridNode.createObject('HexahedronSetTopologyAlgorithms', template='Vec3d', name='TopoAlgo')
-    poutreRegGridNode.createObject('HexahedronSetGeometryAlgorithms', template='Vec3d', name='GeomAlgo')
+    def createGraph(self, node):
+        self.rootNode = node.getRoot()
 
-    # BoxConstraint for fixed constraint (on the left)
-    poutreRegGridNode.createObject('BoxROI', name="FixedROI", box="1.995 -0.005 -0.005 2.035 0.065 0.0205", position='@mecaObj.rest_position')
-    poutreRegGridNode.createObject('FixedConstraint', template='Vec3d', name='default6', indices='@FixedROI.indices')
-    # BoxROI for constant constraint (on the right)
-    poutreRegGridNode.createObject('BoxROI', template='Vec3d', box='1.995 -0.005 0.18 2.035 0.065 0.205', name='box_roi2', position='@mecaObj.rest_position')
-    poutreRegGridNode.createObject('ConstantForceField', points="@box_roi2.indices", force='0 -0.1 0', arrowSizeCoef='0.01')
+        # Creation of stuff needed for collision management
+        node.createObject('CollisionPipeline', depth='6', verbose='0', draw='0')
+        node.createObject('BruteForceDetection')
+        node.createObject('CollisionResponse', response='default')
+        node.createObject('DiscreteIntersection')
+        node.createObject('VisualStyle', displayFlags="showBehaviorModels showForceFields showVisual" )
 
-    # Visual node
-    VisualNode = poutreRegGridNode.createChild('Visu')
-    VisualNode.createObject('OglModel', name='poutreRegGridVisual', fileMesh='mesh/poutre_surface.obj', color='red', dx='2.5')
-    VisualNode.createObject('BarycentricMapping', input='@..', output='@poutreRegGridVisual')
+        # Creation of the 'poutreRegGrid' node
+        poutreRegGridNode = node.createChild('poutreRegGrid')
+        # Add solver
+        poutreRegGridNode.createObject('EulerImplicit', name='cg_solver', printLog='false')
+        poutreRegGridNode.createObject('CGLinearSolver', iterations='25', name='linearSolver', tolerance='1.0e-9', threshold='1.0e-9')
+        # Creation of the regular grid
+        poutreRegGridNode.createObject('MechanicalObject', name='mecaObj')
+        poutreRegGridNode.createObject('RegularGrid', name='regGrid', nx='3', ny='5', nz='10', min='2.495 -0.005 -0.005', max='2.535 0.065 0.205')
+
+        # Set a topology for boxROI
+        poutreRegGridNode.createObject('VolumeTopologyContainer', src='@regGrid', name='Container')
+        poutreRegGridNode.createObject('VolumeTopologyModifier', name='Modifier')
+        poutreRegGridNode.createObject('VolumeGeometryAlgorithms', name='GeomAlgo')
+
+        # Physic manager
+        poutreRegGridNode.createObject('CMHexahedronFEMForceField', name='HFEM', youngModulus='1000', poissonRatio='0.2')
+
+        # BoxConstraint for fixed constraint (on the left)
+        poutreRegGridNode.createObject('BoxROI', name="FixedROI", box="2.495 -0.005 -0.005 2.535 0.065 0.0205", position='@mecaObj.rest_position')
+        poutreRegGridNode.createObject('FixedConstraint', template='Vec3d', name='default6', indices='@FixedROI.indices')
+        # BoxROI for constant constraint (on the right)
+        poutreRegGridNode.createObject('BoxROI', template='Vec3d', box='2.495 -0.005 0.18 2.535 0.065 0.205', name='box_roi2', position='@mecaObj.rest_position')
+        poutreRegGridNode.createObject('ConstantForceField', indices="@box_roi2.indices", force='0 0.1 0', arrowSizeCoef='0.01')
+
+        # Visual node
+        VisualNode = poutreRegGridNode.createChild('Visu')
+        VisualNode.createObject('OglModel', name='poutreRegGridVisual', fileMesh='../mesh/poutre_surface.obj', color='red', dx='2.5')
+        VisualNode.createObject('BarycentricMapping', input='@..', output='@poutreRegGridVisual')
+        VisualNode.createObject('STLExporter', position="@poutreRegGridVisual.position", filename="../ModelsTimer/CGOGN/poutre_grid_CGOGN_model", exportEveryNumberOfSteps='1', exportAtEnd="1", triangle="@poutreRegGridVisual.triangles", listening="1")
+
+        # timer
+        Sofa.timerSetInterval("timer_poutre_grid_CGOGN", 2) # Set the number of steps neded to compute the timer
+        Sofa.timerSetEnabled("timer_poutre_grid_CGOGN", True)
+
+    def bwdInitGraph(self, node):
+        # Send a message to tester script
+        data = ['poutre_grid_CGOGN.py', 'poutreGridCGOGN']
+        self.rootNode.sendScriptEvent('start', data)
+        return 0
+
+    def animate(self, iterations):
+        #setup the environment
+        #Animation loop
+        with open("poutre_grid_CGOGN_timerLog.log", "w+") as outputFile :
+            outputFile.write("{")
+            i = 0
+            Sofa.timerSetOutPutType("timer_poutre_grid_CGOGN", "ljson")
+            while i < iterations:
+                Sofa.timerBegin("timer_poutre_grid_CGOGN")
+                self.rootNode.simulationStep(0.1)
+                result = Sofa.timerEnd("timer_poutre_grid_CGOGN", self.rootNode)
+                if result != None :
+                    outputFile.write(result + ",")
+                    oldResult = result
+                i = i+1
+            last_pose = outputFile.tell()
+            outputFile.seek(last_pose - 1)
+            outputFile.write("\n}")
+            outputFile.seek(7)
+            firstStep = outputFile.read(1)
+            outputFile.close()
+            Sofa.timerSetEnabled("timer_poutre_grid_CGOGN", 0)
+
+            data = [firstStep]
+            self.rootNode.sendScriptEvent('end', data)
+        return 0
+
+    def onScriptEvent(self, senderNode, eventName, data):
+        if eventName=="poutreGridCGOGN":
+            self.animate(data[0])
+        return 0

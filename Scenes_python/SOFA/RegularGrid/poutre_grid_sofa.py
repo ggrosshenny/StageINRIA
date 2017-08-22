@@ -5,45 +5,16 @@ from contextlib import contextmanager
 
 class poutreGridSofa(Sofa.PythonScriptController):
 
-    def fileno(self, file_or_fd):
-        fd = getattr(file_or_fd, 'fileno', lambda: file_or_fd)()
-        if not isinstance(fd, int):
-            raise ValueError("Expected a file (`.fileno()`) or a file descriptor")
-        return fd
-
-    @contextmanager
-    def stdout_redirected(self, to=os.devnull, stdout=None):
-        if stdout is None:
-           stdout = sys.stdout
-
-        stdout_fd = self.fileno(stdout)
-        # copy stdout_fd before it is overwritten
-        #NOTE: `copied` is inheritable on Windows when duplicating a standard stream
-        with os.fdopen(os.dup(stdout_fd), 'wb') as copied:
-            stdout.flush()  # flush library buffers that dup2 knows nothing about
-            try:
-                os.dup2(self.fileno(to), stdout_fd)  # $ exec >&to
-            except ValueError:  # filename
-                with open(to, 'wb') as to_file:
-                    os.dup2(to_file.fileno(), stdout_fd)  # $ exec > to
-            try:
-                yield stdout # allow code to be run with the redirected stdout
-            finally:
-                # restore stdout to its previous value
-                #NOTE: dup2 makes stdout_fd inheritable unconditionally
-                stdout.flush()
-                os.dup2(copied.fileno(), stdout_fd)  # $ exec >&copied
-
     def createGraph(self, node):
 
         self.rootNode = node.getRoot()
 
         # Creation of stuff needed for collision management
-        #node.createObject('DefaultAnimationLoop')
-        #node.createObject('CollisionPipeline', depth='6', verbose='0', draw='0')
-        #node.createObject('BruteForceDetection')
-        #node.createObject('CollisionResponse', response='default')
-        #node.createObject('DiscreteIntersection')
+        node.createObject('DefaultAnimationLoop')
+        node.createObject('CollisionPipeline', depth='6', verbose='0', draw='0')
+        node.createObject('BruteForceDetection')
+        node.createObject('CollisionResponse', response='default')
+        node.createObject('DiscreteIntersection')
         node.createObject('VisualStyle', displayFlags="showBehaviorModels showForceFields showVisual" )
 
         # Creation of the 'poutreRegGrid' node
@@ -72,10 +43,11 @@ class poutreGridSofa(Sofa.PythonScriptController):
         VisualNode = poutreRegGridNode.createChild('Visu')
         VisualNode.createObject('OglModel', name='poutreRegGridVisual', fileMesh='../mesh/poutre_surface.obj', color='red', dx='2.5')
         VisualNode.createObject('BarycentricMapping', input='@..', output='@poutreRegGridVisual')
+        VisualNode.createObject('STLExporter', position="@poutreRegGridVisual.position", filename="../ModelsTimer/SOFA/poutre_grid_sofa_model", exportEveryNumberOfSteps='1', exportAtEnd="1", triangle="@poutreRegGridVisual.triangles", listening="1")
 
         # timer
-        Sofa.timerSetInterval("Animate", 2) # Set the number of steps neded to compute the timer
-        Sofa.timerSetEnabled("Animate", 1)
+        Sofa.timerSetInterval("timer_poutre_grid_sofa", 2) # Set the number of steps neded to compute the timer
+        Sofa.timerSetEnabled("timer_poutre_grid_sofa", True)
 
 
     def bwdInitGraph(self, node):
@@ -91,20 +63,24 @@ class poutreGridSofa(Sofa.PythonScriptController):
         with open("poutre_grid_sofa_timerLog.log", "w+") as outputFile :
             outputFile.write("{")
             i = 0
+            Sofa.timerSetOutPutType("timer_poutre_grid_sofa", "ljson")
             while i < iterations:
-                Sofa.timerBegin("Animate")
+                Sofa.timerBegin("timer_poutre_grid_sofa")
                 self.rootNode.simulationStep(0.1)
-                result = Sofa.timerGetTimeAnalysis("Animate", self.rootNode)
+                result = Sofa.timerEnd("timer_poutre_grid_sofa", self.rootNode)
                 if result != None :
                     outputFile.write(result + ",")
                     oldResult = result
                 i = i+1
-            print "valeur de oldResult : " + oldResult[-1:]
             last_pose = outputFile.tell()
             outputFile.seek(last_pose - 1)
             outputFile.write("\n}")
+            outputFile.seek(7)
+            firstStep = outputFile.read(1)
             outputFile.close()
-            data = [' ']
+            Sofa.timerSetEnabled("timer_poutre_grid_sofa", 0)
+
+            data = [firstStep]
             self.rootNode.sendScriptEvent('end', data)
         return 0
 
