@@ -2,8 +2,15 @@
 
 ### SOFA ###
 
-#LOG files
+# LOG files
 *.log
+
+# Utilities
+ModelsTimer/
+Logs/
+Exemples/
+beam_reference/
+*.tar.gz
 
 ### Python ###
 # Byte-compiled / optimized / DLL files
