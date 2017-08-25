@@ -106,7 +106,6 @@ class TimerLjsonManyFilesPlot() :
         fig, ax = plt.subplots()
         lineColors = ["yellow", "green", "red", "blue", "orange", "black", "purple", "brown"]
         markStyles = ['.', '+', 'p', '*', 'o', 'v', '^', '<', '>', '8', 's', 'h', 'x', 'D', '2']
-	units = {'Dev':'Dev (ms)', 'Level':'level', 'Max':'Max (ms)', 'Mean':'Mean (ms)', 'Min':'Min (ms)', 'Num':'iteration number', 'Percent':'CPU time utilisation (%)', 'Start':'Start (ms)', 'Total':'Total (ms)'}
         lineColorIndice = 0
         markStyleIndice = 0
         fileNameIndice = 0
@@ -123,8 +122,6 @@ class TimerLjsonManyFilesPlot() :
 
         # Create the legend of the plot
         legend = ax.legend(loc='best', shadow=True, fontsize='x-large')
-	ax.set_ylabel(units[value])
-	ax.set_xlabel("AnimationStep")
 
         #legend.get_frame().set_facecolor('#00FFCC')
         plt.show()
